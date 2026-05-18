@@ -35,3 +35,112 @@ body {
 #root {
   min-height: 100vh;
 }
+
+/* Custom date picker */
+.date-picker-nav {
+  display: flex;
+  height: 2rem;
+  width: 2rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.75rem;
+  border: 1px solid var(--color-blush);
+  background: var(--color-surface);
+  font-size: 1.25rem;
+  line-height: 1;
+  color: var(--color-ink);
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.date-picker-nav:hover:not(:disabled) {
+  border-color: var(--color-sage);
+  background: var(--color-blush);
+}
+
+.date-picker-nav:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.date-picker-day {
+  aspect-ratio: 1;
+  border-radius: 0.75rem;
+  border: 1px solid transparent;
+  background: transparent;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--color-ink);
+  transition:
+    background 0.15s ease,
+    color 0.15s ease,
+    border-color 0.15s ease,
+    transform 0.1s ease;
+}
+
+.date-picker-day:hover:not(:disabled):not(.date-picker-day--selected) {
+  background: var(--color-blush);
+  border-color: var(--color-blush);
+}
+
+.date-picker-day--faded {
+  color: var(--color-muted);
+  opacity: 0.55;
+}
+
+.date-picker-day--selected {
+  background: var(--color-sage);
+  border-color: var(--color-sage);
+  color: white;
+  box-shadow: 0 2px 8px rgba(156, 184, 160, 0.45);
+}
+
+.date-picker-day--today:not(.date-picker-day--selected) {
+  border-color: var(--color-terracotta);
+  color: var(--color-terracotta);
+}
+
+.date-picker-day--disabled {
+  opacity: 0.25;
+  cursor: not-allowed;
+}
+
+.date-picker-day:active:not(:disabled) {
+  transform: scale(0.94);
+}
+
+/* Styled text/number inputs */
+.field-input {
+  width: 100%;
+  border-radius: 0.75rem;
+  border: 1px solid var(--color-blush);
+  background: var(--color-canvas);
+  padding: 0.5rem 0.75rem;
+  color: var(--color-ink);
+  outline: none;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.field-input::placeholder {
+  color: var(--color-muted);
+  opacity: 0.7;
+}
+
+.field-input:hover {
+  border-color: color-mix(in srgb, var(--color-sage) 50%, var(--color-blush));
+}
+
+.field-input:focus {
+  border-color: var(--color-sage);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-sage) 25%, transparent);
+}
+
+.field-input--inspo {
+  cursor: pointer;
+}
+
+.field-input--inspo:focus {
+  border-color: var(--color-terracotta);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-terracotta) 25%, transparent);
+}

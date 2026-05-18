@@ -2,6 +2,8 @@ import { format } from 'date-fns';
 import { useState, type FormEvent } from 'react';
 import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
+import { DatePicker } from '@/components/DatePicker';
+import { InspirationModal } from '@/components/InspirationModal';
 import { useProgress } from '@/hooks/useProgress';
 import { MAX_DAILY_STEPS } from '@/lib/storage/types';
 
@@ -13,6 +15,7 @@ export function QuickLogForm() {
   const [note, setNote] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [showInspo, setShowInspo] = useState(false);
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
@@ -41,51 +44,58 @@ export function QuickLogForm() {
   };
 
   return (
-    <Card>
-      <h2 className="mb-4 font-display text-lg font-semibold text-ink">Log today</h2>
-      <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-        <div className="grid gap-3 sm:grid-cols-2">
-          <label className="flex flex-col gap-1 text-sm">
-            <span className="font-semibold text-muted">Date</span>
-            <input
-              type="date"
-              value={date}
-              max={today}
-              onChange={(e) => setDate(e.target.value)}
-              className="rounded-xl border border-blush bg-canvas px-3 py-2 text-ink outline-none focus:border-sage"
-              required
-            />
-          </label>
-          <label className="flex flex-col gap-1 text-sm">
-            <span className="font-semibold text-muted">Steps</span>
-            <input
-              type="number"
-              min={0}
-              max={MAX_DAILY_STEPS}
-              value={steps}
-              onChange={(e) => setSteps(e.target.value)}
-              placeholder="e.g. 12000"
-              className="rounded-xl border border-blush bg-canvas px-3 py-2 text-ink outline-none focus:border-sage"
-              required
-            />
-          </label>
-        </div>
-        <label className="flex flex-col gap-1 text-sm">
-          <span className="font-semibold text-muted">Note (optional)</span>
-          <input
-            type="text"
-            value={note}
-            onChange={(e) => setNote(e.target.value)}
-            placeholder="Morning walk in CDMX…"
-            maxLength={500}
-            className="rounded-xl border border-blush bg-canvas px-3 py-2 text-ink outline-none focus:border-sage"
-          />
-        </label>
-        {error && <p className="text-sm text-terracotta">{error}</p>}
-        <Button type="submit" disabled={saving} className="self-start">
-          {saving ? 'Saving…' : 'Save day'}
-        </Button>
-      </form>
-    </Card>
+    <>
+      <Card>
+        <h2 className="mb-4 font-display text-lg font-semibold text-ink">Log today</h2>
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          <div className="grid gap-4 lg:grid-cols-2">
+            <div className="flex flex-col gap-2">
+              <span className="text-sm font-semibold text-muted">Date</span>
+              <DatePicker value={date} max={today} onChange={setDate} />
+            </div>
+            <div className="flex flex-col gap-3">
+              <label className="flex flex-col gap-1 text-sm">
+                <span className="flex items-center justify-between gap-2">
+                  <span className="font-semibold text-muted">Steps</span>
+                  <button
+                    type="button"
+                    onClick={() => setShowInspo(true)}
+                    className="rounded-lg bg-sky/30 px-2 py-0.5 text-xs font-semibold text-ink transition hover:bg-sky/50"
+                  >
+                    Route inspo
+                  </button>
+                </span>
+                <input
+                  type="number"
+                  min={0}
+                  max={MAX_DAILY_STEPS}
+                  value={steps}
+                  onChange={(e) => setSteps(e.target.value)}
+                  placeholder="e.g. 12000"
+                  className="field-input"
+                  required
+                />
+              </label>
+              <label className="flex flex-col gap-1 text-sm">
+                <span className="font-semibold text-muted">Note (optional)</span>
+                <input
+                  type="text"
+                  value={note}
+                  onChange={(e) => setNote(e.target.value)}
+                  placeholder="Morning walk in CDMX…"
+                  maxLength={500}
+                  className="field-input"
+                />
+              </label>
+            </div>
+          </div>
+          {error && <p className="text-sm text-terracotta">{error}</p>}
+          <Button type="submit" disabled={saving} className="self-start">
+            {saving ? 'Saving…' : 'Save day'}
+          </Button>
+        </form>
+      </Card>
+      <InspirationModal open={showInspo} onClose={() => setShowInspo(false)} />
+    </>
   );
 }
