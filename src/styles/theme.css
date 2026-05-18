@@ -1,0 +1,37 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,600;0,9..40,700;1,9..40,400&family=Nunito:wght@400;600;700&display=swap');
+
+:root {
+  --color-canvas: #fbf8f4;
+  --color-surface: #fff9f3;
+  --color-blush: #f5ebe0;
+  --color-ink: #4a4543;
+  --color-muted: #8a837c;
+  --color-sage: #9cb8a0;
+  --color-terracotta: #d4a574;
+  --color-sky: #a8c5da;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: 'Nunito', system-ui, sans-serif;
+  color: var(--color-ink);
+  background: var(--color-canvas);
+  background-image:
+    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(168, 197, 218, 0.35), transparent),
+    radial-gradient(ellipse 60% 40% at 100% 100%, rgba(156, 184, 160, 0.2), transparent);
+}
+
+#root {
+  min-height: 100vh;
+}
