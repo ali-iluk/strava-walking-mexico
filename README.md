@@ -8,13 +8,15 @@ Every push to `main` deploys automatically via GitHub Actions to **GitHub Pages*
 
 **https://ali-iluk.github.io/strava-walking-mexico/**
 
-No local dev server required. Edit → commit → push → site updates in ~1–2 minutes.
+Data is stored in **Supabase** (source of truth). Export JSON is still available for backups.
 
-### One-time setup (if the repo is new)
+### One-time Supabase setup
 
-1. Create the GitHub repo and push (see [Git](#git) below).
-2. In the repo on GitHub: **Settings → Pages → Build and deployment → Source** → choose **GitHub Actions**.
-3. Push to `main`; the workflow in [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml) builds and publishes.
+Run [`supabase/schema.sql`](supabase/schema.sql) in the [Supabase SQL Editor](https://supabase.com/dashboard/project/eosnrudeqjoddcpfiiey/sql/new). See [`supabase/README.md`](supabase/README.md).
+
+### GitHub Pages
+
+**Settings → Pages → Source** → **GitHub Actions**. Secrets `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` must be set on the repo.
 
 ### Alternative: Vercel (custom domain, no `/repo-name/` path)
 
@@ -75,13 +77,11 @@ Stored under `walking-mexico:v1` in `localStorage`:
 
 Import merges by `date` (incoming entry wins on conflict).
 
-**Note:** Data is per-browser. Use **Data → Export JSON** before switching devices or clearing site data.
+**Note:** Data syncs via Supabase. Use **Data → Export JSON** for offline backups.
 
-## Future: Strava & database
+## Future: Strava
 
-Strava OAuth can be added later for activity distance, but the **Strava API does not expose step counts**. This app is designed for manual logging first.
-
-To add a minimal backend, implement `ProgressRepository` (see `src/lib/storage/repository.ts`) with HTTP calls; keep the same `AppSnapshot` JSON shape.
+Strava OAuth can be added later for activity distance, but the **Strava API does not expose step counts**. Manual logging remains the source of step totals.
 
 ## Stack
 

@@ -6,7 +6,7 @@ import { useProgress } from '@/hooks/useProgress';
 import { GOAL_STEPS } from '@/lib/storage/types';
 
 export function HeroCounter() {
-  const { totalSteps, remaining, percentComplete, projection, isLoading } = useProgress();
+  const { totalSteps, remaining, percentComplete, projection, isLoading, error } = useProgress();
   const animatedTotal = useAnimatedNumber(totalSteps);
   const [showInspo, setShowInspo] = useState(false);
 
@@ -14,6 +14,19 @@ export function HeroCounter() {
     return (
       <section className="text-center">
         <p className="text-muted">Loading your progress…</p>
+      </section>
+    );
+  }
+
+  if (error) {
+    return (
+      <section className="rounded-2xl border border-terracotta/40 bg-blush/50 p-4 text-center">
+        <p className="font-semibold text-terracotta">Database connection failed</p>
+        <p className="mt-2 text-sm text-muted">{error}</p>
+        <p className="mt-2 text-xs text-muted">
+          Run <code className="rounded bg-canvas px-1">supabase/schema.sql</code> in the Supabase SQL
+          editor, then refresh.
+        </p>
       </section>
     );
   }

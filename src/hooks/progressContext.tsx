@@ -7,7 +7,6 @@ import {
   type ReactNode,
 } from 'react';
 import { downloadSnapshot } from '@/lib/import-export/exportSnapshot';
-import { mergeSnapshots, parseImportFile } from '@/lib/import-export/importSnapshot';
 import {
   buildCumulativeSeries,
   computeStats,
@@ -16,12 +15,13 @@ import {
   sortEntriesDesc,
 } from '@/lib/progress/aggregate';
 import { lastSevenDailyBars, projectFinishDate } from '@/lib/progress/projections';
-import { progressRepository } from '@/lib/storage/localStorageRepository';
+import { initProgressStorage, progressRepository } from '@/lib/storage';
 import type { AppSnapshot, DayEntry, UpsertEntryInput } from '@/lib/storage/types';
 
 export type ProgressContextValue = {
   snapshot: AppSnapshot;
   isLoading: boolean;
+  error: string | null;
   totalSteps: number;
   remaining: number;
   percentComplete: number;
@@ -33,7 +33,6 @@ export type ProgressContextValue = {
   upsert: (input: UpsertEntryInput) => Promise<void>;
   remove: (id: string) => Promise<void>;
   exportData: () => void;
-  importFile: (file: File) => Promise<{ ok: boolean; message: string }>;
   clearAll: () => Promise<void>;
   refresh: () => Promise<void>;
 };
@@ -43,6 +42,7 @@ export const ProgressContext = createContext<ProgressContextValue | null>(null);
 export function ProgressProvider({ children }: { children: ReactNode }) {
   const [snapshot, setSnapshot] = useState<AppSnapshot>(createEmptySnapshot());
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const refresh = useCallback(async () => {
     setSnapshot(await progressRepository.load());
@@ -51,8 +51,17 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     void (async () => {
       setIsLoading(true);
-      await refresh();
-      setIsLoading(false);
+      setError(null);
+      try {
+        await initProgressStorage();
+        await refresh();
+      } catch (err) {
+        const message =
+          err instanceof Error ? err.message : 'Could not connect to the database.';
+        setError(message);
+      } finally {
+        setIsLoading(false);
+      }
     })();
   }, [refresh]);
 
@@ -89,23 +98,6 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
     downloadSnapshot(snapshot);
   }, [snapshot]);
 
-  const importFile = useCallback(
-    async (file: File) => {
-      const result = await parseImportFile(file);
-      if (!result.ok) {
-        return { ok: false, message: result.errors.join('; ') };
-      }
-      const { snapshot: merged } = mergeSnapshots(snapshot, result.snapshot);
-      await progressRepository.save(merged);
-      await refresh();
-      return {
-        ok: true,
-        message: `Imported ${result.mergedCount} entries (merged by date).`,
-      };
-    },
-    [snapshot, refresh],
-  );
-
   const clearAll = useCallback(async () => {
     await progressRepository.clear();
     await refresh();
@@ -114,6 +106,7 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
   const value: ProgressContextValue = {
     snapshot,
     isLoading,
+    error,
     totalSteps: stats.totalSteps,
     remaining: stats.remaining,
     percentComplete: stats.percentComplete,
@@ -125,7 +118,6 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
     upsert,
     remove,
     exportData,
-    importFile,
     clearAll,
     refresh,
   };
