@@ -6,3 +6,7 @@ dist-ssr
 .env.*
 !.env.example
 .DS_Store
+
+# Supabase CLI local state (project ref after link is in migrations history)
+supabase/.branches
+supabase/.temp

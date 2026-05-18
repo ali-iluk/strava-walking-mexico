@@ -10,9 +10,14 @@ Every push to `main` deploys automatically via GitHub Actions to **GitHub Pages*
 
 Data is stored in **Supabase** (source of truth). Export JSON is still available for backups.
 
-### One-time Supabase setup
+### Supabase migrations
 
-Run [`supabase/schema.sql`](supabase/schema.sql) in the [Supabase SQL Editor](https://supabase.com/dashboard/project/eosnrudeqjoddcpfiiey/sql/new). See [`supabase/README.md`](supabase/README.md).
+```bash
+npx supabase login   # once
+npm run db:migrate   # links project eosnrudeqjoddcpfiiey + pushes migrations
+```
+
+See [`supabase/README.md`](supabase/README.md).
 
 ### GitHub Pages
 

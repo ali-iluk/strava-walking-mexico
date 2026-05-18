@@ -1,14 +1,41 @@
-# Supabase setup (one-time)
+# Supabase (strava-walking-mexico)
 
-1. Open [SQL Editor](https://supabase.com/dashboard/project/eosnrudeqjoddcpfiiey/sql/new) for your project.
-2. Paste the contents of [`schema.sql`](./schema.sql) and click **Run**.
-3. Confirm the `day_entries` table appears under **Table Editor**.
+| | |
+|---|---|
+| **Project** | AliVillegas's Project |
+| **Ref** | `eosnrudeqjoddcpfiiey` |
+| **URL** | https://eosnrudeqjoddcpfiiey.supabase.co |
 
-The app reads and writes all step logs to this table. RLS policies allow the anon key (personal tracker). Tighten policies before sharing the app publicly.
+## Run migrations (CLI)
+
+```bash
+# One-time: log in if needed
+npx supabase login
+
+# Link + push all migrations in supabase/migrations/
+npm run db:migrate
+```
+
+Non-interactive link (CI / scripts):
+
+```bash
+export SUPABASE_DB_PASSWORD='your-database-password'
+npm run db:migrate
+```
+
+Or use a personal access token: `export SUPABASE_ACCESS_TOKEN=...` then `npm run db:migrate`.
+
+## New migration
+
+```bash
+npx supabase migration new your_migration_name
+# edit supabase/migrations/<timestamp>_your_migration_name.sql
+npm run db:migrate
+```
 
 ## Local env
 
-Copy `.env.example` to `.env` and set:
+`.env` (gitignored):
 
 ```
 VITE_SUPABASE_URL=https://eosnrudeqjoddcpfiiey.supabase.co
@@ -17,9 +44,4 @@ VITE_SUPABASE_ANON_KEY=your-anon-key
 
 ## Production (GitHub Pages)
 
-Repository secrets (already configured via `gh secret set`):
-
-- `VITE_SUPABASE_URL`
-- `VITE_SUPABASE_ANON_KEY`
-
-Rotate the anon key in Supabase when needed, then update GitHub secrets and `.env`.
+Repo secrets: `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`.

@@ -10,7 +10,9 @@
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "db:migrate": "node scripts/migrate-db.mjs",
+    "db:push": "npx supabase db push --yes"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.106.0",

@@ -24,8 +24,8 @@ export function HeroCounter() {
         <p className="font-semibold text-terracotta">Database connection failed</p>
         <p className="mt-2 text-sm text-muted">{error}</p>
         <p className="mt-2 text-xs text-muted">
-          Run <code className="rounded bg-canvas px-1">supabase/schema.sql</code> in the Supabase SQL
-          editor, then refresh.
+          Run <code className="rounded bg-canvas px-1">npm run db:migrate</code> to apply Supabase
+          migrations, then refresh.
         </p>
       </section>
     );
