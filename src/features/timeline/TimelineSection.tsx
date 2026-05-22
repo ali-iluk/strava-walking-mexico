@@ -1,16 +1,32 @@
 import { format } from 'date-fns';
 import { useRef } from 'react';
+import type { RouteMapView } from '@/components/RouteMapModal';
 import { Card } from '@/components/Card';
 import { useProgress } from '@/hooks/useProgress';
+import { formatSteps } from '@/hooks/useAnimatedNumber';
+import { runningTotalAtDate } from '@/lib/progress/aggregate';
 import { TimelineDayCard } from '@/features/timeline/TimelineDayCard';
 
-export function TimelineSection() {
-  const { monthGroups, entriesSorted, walkCount, dayCount } = useProgress();
+type TimelineSectionProps = {
+  onOpenMap: (view: RouteMapView) => void;
+};
+
+export function TimelineSection({ onOpenMap }: TimelineSectionProps) {
+  const { monthGroups, entriesSorted, snapshot, walkCount } = useProgress();
   const todayRef = useRef<HTMLDivElement>(null);
   const today = format(new Date(), 'yyyy-MM-dd');
 
   const scrollToToday = () => {
     todayRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  };
+
+  const openDayOnMap = (date: string, dateLabel: string) => {
+    const steps = runningTotalAtDate(snapshot.entries, date);
+    onOpenMap({
+      totalSteps: steps,
+      title: `Where you were — ${dateLabel}`,
+      subtitle: `End of that day — ${formatSteps(steps)} steps cumulative on the route.`,
+    });
   };
 
   if (entriesSorted.length === 0) {
@@ -35,7 +51,7 @@ export function TimelineSection() {
         <div>
           <h2 className="font-display text-lg font-semibold text-ink">History</h2>
           <p className="text-xs text-muted">
-            {walkCount} walks · {dayCount} days
+            {walkCount} walks · tap a day to see where you were on the map
           </p>
         </div>
         {hasToday && (
@@ -75,6 +91,14 @@ export function TimelineSection() {
                         showDateHeader={index === 0}
                         dateLabel={dateGroup.dateLabel}
                         dailySteps={dateGroup.dailySteps}
+                        onOpenDayMap={() => openDayOnMap(dateGroup.date, dateGroup.dateLabel)}
+                        onOpenWalkMap={(steps, label) =>
+                          onOpenMap({
+                            totalSteps: steps,
+                            title: `Where you were — ${label}`,
+                            subtitle: `After this walk — ${formatSteps(steps)} steps cumulative.`,
+                          })
+                        }
                       />
                     ))}
                   </div>

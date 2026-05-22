@@ -125,6 +125,16 @@ export function runningTotalAtDate(entries: DayEntry[], targetDate: string): num
     .reduce((sum, e) => sum + e.steps, 0);
 }
 
+/** Cumulative steps after this specific walk (chronological by date, then updatedAt). */
+export function runningTotalAfterEntry(entries: DayEntry[], entryId: string): number {
+  let sum = 0;
+  for (const entry of sortEntriesAsc(entries)) {
+    sum += entry.steps;
+    if (entry.id === entryId) return sum;
+  }
+  return sum;
+}
+
 export function createEmptySnapshot(): AppSnapshot {
   const now = new Date().toISOString();
   return {

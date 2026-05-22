@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { Button } from '@/components/Button';
 import { formatSteps } from '@/hooks/useAnimatedNumber';
 import { useProgress } from '@/hooks/useProgress';
-import { runningTotalAtDate } from '@/lib/progress/aggregate';
+import { runningTotalAfterEntry, runningTotalAtDate } from '@/lib/progress/aggregate';
 import type { DayEntry } from '@/lib/storage/types';
 import { MAX_DAILY_STEPS } from '@/lib/storage/types';
 import { TimelineDayCardEdit } from '@/features/timeline/TimelineDayCardEdit';
@@ -15,6 +15,8 @@ type TimelineDayCardProps = {
   showDateHeader: boolean;
   dateLabel: string;
   dailySteps: number;
+  onOpenDayMap: () => void;
+  onOpenWalkMap: (steps: number, label: string) => void;
 };
 
 export function TimelineDayCard({
@@ -24,6 +26,8 @@ export function TimelineDayCard({
   showDateHeader,
   dateLabel,
   dailySteps,
+  onOpenDayMap,
+  onOpenWalkMap,
 }: TimelineDayCardProps) {
   const { snapshot, upsert, remove } = useProgress();
   const [editing, setEditing] = useState(false);
@@ -32,6 +36,7 @@ export function TimelineDayCard({
   const [busy, setBusy] = useState(false);
 
   const runningTotal = runningTotalAtDate(snapshot.entries, entry.date);
+  const stepsAfterWalk = runningTotalAfterEntry(snapshot.entries, entry.id);
   const timeLabel = format(parseISO(entry.updatedAt), 'h:mm a');
   const walkLabel =
     walkCountForDay > 1 ? `Walk ${walkIndex + 1} · ${timeLabel}` : timeLabel;
@@ -71,18 +76,27 @@ export function TimelineDayCard({
 
   return (
     <article
-      className={`flex gap-3 rounded-xl border border-blush/80 bg-canvas/80 p-3 ${
+      className={`flex gap-3 rounded-xl border border-blush/80 bg-canvas/80 p-3 transition ${
         !showDateHeader ? 'ml-4 border-l-2 border-l-sage/40' : ''
       }`}
     >
       <div className="mt-1 h-2 w-2 shrink-0 rounded-full bg-sage" aria-hidden />
       <div className="min-w-0 flex-1">
         {showDateHeader && (
-          <div className="mb-2 flex flex-wrap items-baseline justify-between gap-2 border-b border-blush/50 pb-2">
-            <p className="font-display text-sm font-semibold text-ink">{dateLabel}</p>
-            <p className="text-xs font-semibold text-sage">
-              {formatSteps(dailySteps)} steps today
-            </p>
+          <div className="mb-2 flex flex-wrap items-center justify-between gap-2 border-b border-blush/50 pb-2">
+            <button
+              type="button"
+              onClick={onOpenDayMap}
+              className="group text-left"
+              title="See where you were on the map at end of this day"
+            >
+              <p className="font-display text-sm font-semibold text-ink group-hover:text-terracotta">
+                {dateLabel}
+              </p>
+              <p className="text-xs font-semibold text-sage group-hover:underline">
+                {formatSteps(dailySteps)} steps · On map →
+              </p>
+            </button>
           </div>
         )}
         <div className="flex flex-wrap items-start justify-between gap-2">
@@ -103,7 +117,14 @@ export function TimelineDayCard({
             )}
           </div>
           {!editing && (
-            <div className="flex gap-1">
+            <div className="flex flex-wrap gap-1">
+              <Button
+                variant="ghost"
+                className="!px-2 !py-1 text-xs text-sky"
+                onClick={() => onOpenWalkMap(stepsAfterWalk, `${dateLabel} · ${walkLabel}`)}
+              >
+                Map
+              </Button>
               <Button variant="ghost" className="!px-2 !py-1 text-xs" onClick={() => setEditing(true)}>
                 Edit
               </Button>

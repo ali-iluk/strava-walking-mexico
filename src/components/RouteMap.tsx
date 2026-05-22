@@ -8,6 +8,8 @@ import { GOAL_STEPS } from '@/lib/storage/types';
 
 type RouteMapProps = {
   totalSteps: number;
+  /** When true, zooms to show Cancún → your position (better for historical snapshots). */
+  focusOnProgress?: boolean;
 };
 
 function FitBounds({ positions }: { positions: L.LatLngExpression[] }) {
@@ -20,7 +22,7 @@ function FitBounds({ positions }: { positions: L.LatLngExpression[] }) {
   return null;
 }
 
-export function RouteMap({ totalSteps }: RouteMapProps) {
+export function RouteMap({ totalSteps, focusOnProgress = false }: RouteMapProps) {
   const [error, setError] = useState<string | null>(null);
   const [routeMeta, setRouteMeta] = useState<{ distanceKm: number } | null>(null);
   const [lineLatLngs, setLineLatLngs] = useState<L.LatLngExpression[]>([]);
@@ -67,6 +69,8 @@ export function RouteMap({ totalSteps }: RouteMapProps) {
 
   const start = lineLatLngs[0]!;
   const end = lineLatLngs[lineLatLngs.length - 1]!;
+  const boundsPositions =
+    focusOnProgress && youPosition ? [start, youPosition] : lineLatLngs;
 
   return (
     <div>
@@ -97,7 +101,7 @@ export function RouteMap({ totalSteps }: RouteMapProps) {
             radius={7}
             pathOptions={{ color: '#4A4543', fillColor: '#9CB8A0', fillOpacity: 1, weight: 2 }}
           />
-          <FitBounds positions={lineLatLngs} />
+          <FitBounds positions={boundsPositions} />
         </MapContainer>
       </div>
       <div className="border-t border-blush/60 bg-canvas/80 px-4 py-3 text-sm">
