@@ -35,10 +35,12 @@ export class LocalStorageRepository implements ProgressRepository {
   async upsertEntry(input: UpsertEntryInput): Promise<DayEntry> {
     const snapshot = await this.load();
     const now = new Date().toISOString();
-    const existingIndex = snapshot.entries.findIndex((e) => e.date === input.date);
+    const existingIndex = input.id
+      ? snapshot.entries.findIndex((e) => e.id === input.id)
+      : -1;
 
     const entry: DayEntry = {
-      id: input.id ?? snapshot.entries[existingIndex]?.id ?? crypto.randomUUID(),
+      id: input.id ?? crypto.randomUUID(),
       date: input.date,
       steps: input.steps,
       note: input.note?.trim() || undefined,

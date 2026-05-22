@@ -65,7 +65,7 @@ export function HeroCounter() {
         </p>
         {projection.projectedFinishDate && (
           <p className="mt-2 text-xs text-muted">
-            At ~{formatSteps(projection.avgDailySteps)}/day (last {projection.windowDays} logs):
+            At ~{formatSteps(projection.avgDailySteps)}/day (last {projection.windowDays} days):
             finish around {projection.projectedFinishDate}
           </p>
         )}

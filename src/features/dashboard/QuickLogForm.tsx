@@ -35,7 +35,6 @@ export function QuickLogForm() {
       await upsert({ date, steps: parsed, note: note.trim() || undefined });
       setSteps('');
       setNote('');
-      setDate(today);
     } catch {
       setError('Could not save. Try again.');
     } finally {
@@ -46,7 +45,10 @@ export function QuickLogForm() {
   return (
     <>
       <Card>
-        <h2 className="mb-4 font-display text-lg font-semibold text-ink">Log today</h2>
+        <h2 className="mb-1 font-display text-lg font-semibold text-ink">Add a walk</h2>
+      <p className="mb-4 text-sm text-muted">
+        Log each walk separately — morning and evening on the same day are summed in your stats.
+      </p>
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div className="grid gap-4 lg:grid-cols-2">
             <div className="flex flex-col gap-2">
@@ -90,9 +92,9 @@ export function QuickLogForm() {
             </div>
           </div>
           {error && <p className="text-sm text-terracotta">{error}</p>}
-          <Button type="submit" disabled={saving} className="self-start">
-            {saving ? 'Saving…' : 'Save day'}
-          </Button>
+        <Button type="submit" disabled={saving} className="self-start">
+          {saving ? 'Saving…' : 'Add walk'}
+        </Button>
         </form>
       </Card>
       <InspirationModal open={showInspo} onClose={() => setShowInspo(false)} />

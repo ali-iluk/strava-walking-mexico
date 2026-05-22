@@ -10,6 +10,7 @@ import { downloadSnapshot } from '@/lib/import-export/exportSnapshot';
 import {
   buildCumulativeSeries,
   computeStats,
+  countDistinctDays,
   createEmptySnapshot,
   groupByMonth,
   sortEntriesDesc,
@@ -26,6 +27,8 @@ export type ProgressContextValue = {
   remaining: number;
   percentComplete: number;
   entriesSorted: DayEntry[];
+  walkCount: number;
+  dayCount: number;
   monthGroups: ReturnType<typeof groupByMonth>;
   cumulativeSeries: ReturnType<typeof buildCumulativeSeries>;
   dailyBars: ReturnType<typeof lastSevenDailyBars>;
@@ -67,6 +70,8 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
 
   const stats = useMemo(() => computeStats(snapshot), [snapshot]);
   const entriesSorted = useMemo(() => sortEntriesDesc(snapshot.entries), [snapshot.entries]);
+  const walkCount = snapshot.entries.length;
+  const dayCount = useMemo(() => countDistinctDays(snapshot.entries), [snapshot.entries]);
   const monthGroups = useMemo(() => groupByMonth(snapshot.entries), [snapshot.entries]);
   const cumulativeSeries = useMemo(
     () => buildCumulativeSeries(snapshot.entries),
@@ -111,6 +116,8 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
     remaining: stats.remaining,
     percentComplete: stats.percentComplete,
     entriesSorted,
+    walkCount,
+    dayCount,
     monthGroups,
     cumulativeSeries,
     dailyBars,

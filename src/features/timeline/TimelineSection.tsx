@@ -5,7 +5,7 @@ import { useProgress } from '@/hooks/useProgress';
 import { TimelineDayCard } from '@/features/timeline/TimelineDayCard';
 
 export function TimelineSection() {
-  const { monthGroups, entriesSorted } = useProgress();
+  const { monthGroups, entriesSorted, walkCount, dayCount } = useProgress();
   const todayRef = useRef<HTMLDivElement>(null);
   const today = format(new Date(), 'yyyy-MM-dd');
 
@@ -21,7 +21,7 @@ export function TimelineSection() {
         </p>
         <h2 className="mt-3 font-display text-lg font-semibold text-ink">No walks logged yet</h2>
         <p className="mt-2 text-sm text-muted">
-          Log your first day above — your timeline will fill up as you go.
+          Log your first walk above — add morning and evening separately on the same day.
         </p>
       </Card>
     );
@@ -34,7 +34,9 @@ export function TimelineSection() {
       <div className="sticky top-0 z-10 mb-3 flex items-center justify-between rounded-xl bg-canvas/90 py-2 backdrop-blur-sm">
         <div>
           <h2 className="font-display text-lg font-semibold text-ink">History</h2>
-          <p className="text-xs text-muted">{entriesSorted.length} days logged</p>
+          <p className="text-xs text-muted">
+            {walkCount} walks · {dayCount} days
+          </p>
         </div>
         {hasToday && (
           <button
@@ -49,7 +51,7 @@ export function TimelineSection() {
       <div
         className="max-h-[min(60vh,520px)] overflow-y-auto rounded-2xl border border-blush/60 bg-surface/50 p-3 pr-2"
         role="feed"
-        aria-label="Daily step history"
+        aria-label="Walk history"
       >
         <div className="flex flex-col gap-6">
           {monthGroups.map((group) => (
@@ -57,13 +59,24 @@ export function TimelineSection() {
               <h3 className="sticky top-0 z-[1] mb-2 bg-surface/95 py-1 font-display text-xs font-bold uppercase tracking-wider text-muted">
                 {group.label}
               </h3>
-              <div className="flex flex-col gap-2">
-                {group.entries.map((entry) => (
+              <div className="flex flex-col gap-3">
+                {group.dateGroups.map((dateGroup) => (
                   <div
-                    key={entry.id}
-                    ref={entry.date === today ? todayRef : undefined}
+                    key={dateGroup.date}
+                    ref={dateGroup.date === today ? todayRef : undefined}
+                    className="flex flex-col gap-2"
                   >
-                    <TimelineDayCard entry={entry} />
+                    {dateGroup.entries.map((entry, index) => (
+                      <TimelineDayCard
+                        key={entry.id}
+                        entry={entry}
+                        walkIndex={index}
+                        walkCountForDay={dateGroup.entries.length}
+                        showDateHeader={index === 0}
+                        dateLabel={dateGroup.dateLabel}
+                        dailySteps={dateGroup.dailySteps}
+                      />
+                    ))}
                   </div>
                 ))}
               </div>

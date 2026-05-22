@@ -41,7 +41,8 @@ export class SupabaseRepository implements ProgressRepository {
     const { data, error } = await supabase
       .from('day_entries')
       .select('id, date, steps, note, updated_at')
-      .order('date', { ascending: true });
+      .order('date', { ascending: false })
+      .order('updated_at', { ascending: false });
 
     if (error) {
       throw new Error(`Failed to load entries: ${error.message}`);
@@ -62,7 +63,7 @@ export class SupabaseRepository implements ProgressRepository {
 
     if (rows.length === 0) return;
 
-    const { error } = await supabase.from('day_entries').upsert(rows, { onConflict: 'date' });
+    const { error } = await supabase.from('day_entries').upsert(rows, { onConflict: 'id' });
 
     if (error) {
       throw new Error(`Failed to save entries: ${error.message}`);
@@ -70,21 +71,34 @@ export class SupabaseRepository implements ProgressRepository {
   }
 
   async upsertEntry(input: UpsertEntryInput): Promise<DayEntry> {
-    const payload = {
-      ...(input.id ? { id: input.id } : {}),
+    const row = {
       date: input.date,
       steps: input.steps,
       note: input.note?.trim() || null,
     };
 
+    if (input.id) {
+      const { data, error } = await supabase
+        .from('day_entries')
+        .update(row)
+        .eq('id', input.id)
+        .select('id, date, steps, note, updated_at')
+        .single();
+
+      if (error || !data) {
+        throw new Error(`Failed to update walk: ${error?.message ?? 'No data returned'}`);
+      }
+      return rowToEntry(data);
+    }
+
     const { data, error } = await supabase
       .from('day_entries')
-      .upsert(payload, { onConflict: 'date' })
+      .insert(row)
       .select('id, date, steps, note, updated_at')
       .single();
 
     if (error || !data) {
-      throw new Error(`Failed to save day: ${error?.message ?? 'No data returned'}`);
+      throw new Error(`Failed to add walk: ${error?.message ?? 'No data returned'}`);
     }
 
     return rowToEntry(data);
@@ -99,10 +113,7 @@ export class SupabaseRepository implements ProgressRepository {
   }
 
   async clear(): Promise<void> {
-    const { error } = await supabase
-      .from('day_entries')
-      .delete()
-      .gte('date', '1970-01-01');
+    const { error } = await supabase.from('day_entries').delete().gte('date', '1970-01-01');
 
     if (error) {
       throw new Error(`Failed to clear entries: ${error.message}`);
