@@ -1,14 +1,16 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import { Button } from '@/components/Button';
+import { RouteMap } from '@/components/RouteMap';
+import { useProgress } from '@/hooks/useProgress';
 
 type InspirationModalProps = {
   open: boolean;
   onClose: () => void;
 };
 
-const routeImage = `${import.meta.env.BASE_URL}mexico-route.png`;
-
 export function InspirationModal({ open, onClose }: InspirationModalProps) {
+  const { totalSteps } = useProgress();
+
   return (
     <AnimatePresence>
       {open && (
@@ -28,25 +30,22 @@ export function InspirationModal({ open, onClose }: InspirationModalProps) {
             aria-label="Close"
           />
           <motion.div
-            className="relative z-10 max-h-[90vh] w-full max-w-md overflow-hidden rounded-2xl border border-blush bg-surface shadow-soft"
+            className="relative z-10 flex max-h-[92vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl border border-blush bg-surface shadow-soft"
             initial={{ scale: 0.95, y: 12 }}
             animate={{ scale: 1, y: 0 }}
             exit={{ scale: 0.95, y: 12 }}
           >
             <div className="border-b border-blush/60 bg-gradient-to-r from-sky/20 via-sage/20 to-terracotta/20 px-5 py-4">
               <h2 id="inspiration-title" className="font-display text-lg font-bold text-ink">
-                The path to 6M
+                Where you&apos;d be on the walk
               </h2>
               <p className="mt-1 text-sm text-muted">
-                Tijuana → Yucatán — ~4,532 km of walking. Every step you log is part of the journey.
+                Estimated foot route Cancún → Tijuana (~4,676 km). Your steps place you along the
+                path.
               </p>
             </div>
-            <img
-              src={routeImage}
-              alt="Walking route across Mexico from Tijuana to the Yucatán Peninsula"
-              className="h-auto w-full object-cover"
-            />
-            <div className="flex justify-end gap-2 px-5 py-4">
+            <RouteMap totalSteps={totalSteps} />
+            <div className="flex justify-end gap-2 border-t border-blush/60 px-5 py-4">
               <Button variant="secondary" onClick={onClose}>
                 Keep walking
               </Button>

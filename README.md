@@ -19,6 +19,16 @@ npm run db:migrate   # links project eosnrudeqjoddcpfiiey + pushes migrations
 
 See [`supabase/README.md`](supabase/README.md).
 
+### Route map (Cancún → Tijuana)
+
+The inspo modal uses an estimated foot route from OSRM (~4,676 km). Regenerate:
+
+```bash
+npm run route:fetch
+```
+
+Data is saved to `public/mexico-walk-route.geojson`.
+
 ### GitHub Pages
 
 **Settings → Pages → Source** → **GitHub Actions**. Secrets `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` must be set on the repo.
