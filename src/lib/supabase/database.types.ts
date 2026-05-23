@@ -7,6 +7,7 @@ export type Database = {
           date: string;
           steps: number;
           note: string | null;
+          walk_at: string;
           created_at: string;
           updated_at: string;
         };
@@ -15,6 +16,7 @@ export type Database = {
           date: string;
           steps: number;
           note?: string | null;
+          walk_at?: string;
           created_at?: string;
           updated_at?: string;
         };
@@ -23,6 +25,7 @@ export type Database = {
           date?: string;
           steps?: number;
           note?: string | null;
+          walk_at?: string;
           created_at?: string;
           updated_at?: string;
         };

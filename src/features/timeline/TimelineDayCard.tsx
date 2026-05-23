@@ -1,9 +1,13 @@
-import { format, parseISO } from 'date-fns';
 import { useState } from 'react';
 import { Button } from '@/components/Button';
 import { formatSteps } from '@/hooks/useAnimatedNumber';
 import { useProgress } from '@/hooks/useProgress';
 import { runningTotalAfterEntry, runningTotalAtDate } from '@/lib/progress/aggregate';
+import {
+  combineDateAndTime,
+  formatWalkTime,
+  walkTimeInputValue,
+} from '@/lib/progress/walkAt';
 import type { DayEntry } from '@/lib/storage/types';
 import { EditAccessDeniedError } from '@/lib/auth/editGate';
 import { MAX_DAILY_STEPS } from '@/lib/storage/types';
@@ -34,11 +38,12 @@ export function TimelineDayCard({
   const [editing, setEditing] = useState(false);
   const [steps, setSteps] = useState(String(entry.steps));
   const [note, setNote] = useState(entry.note ?? '');
+  const [walkTime, setWalkTime] = useState(walkTimeInputValue(entry.walkAt));
   const [busy, setBusy] = useState(false);
 
   const runningTotal = runningTotalAtDate(snapshot.entries, entry.date);
   const stepsAfterWalk = runningTotalAfterEntry(snapshot.entries, entry.id);
-  const timeLabel = format(parseISO(entry.updatedAt), 'h:mm a');
+  const timeLabel = formatWalkTime(entry.walkAt);
   const walkLabel =
     walkCountForDay > 1 ? `Walk ${walkIndex + 1} · ${timeLabel}` : timeLabel;
 
@@ -52,6 +57,7 @@ export function TimelineDayCard({
         date: entry.date,
         steps: parsed,
         note: note.trim() || undefined,
+        walkAt: combineDateAndTime(entry.date, walkTime),
       });
       setEditing(false);
     } catch (err) {
@@ -66,6 +72,7 @@ export function TimelineDayCard({
     setEditing(false);
     setSteps(String(entry.steps));
     setNote(entry.note ?? '');
+    setWalkTime(walkTimeInputValue(entry.walkAt));
   };
 
   const handleDelete = async () => {
@@ -114,9 +121,11 @@ export function TimelineDayCard({
               <TimelineDayCardEdit
                 steps={steps}
                 note={note}
+                walkTime={walkTime}
                 busy={busy}
                 onStepsChange={setSteps}
                 onNoteChange={setNote}
+                onWalkTimeChange={setWalkTime}
                 onSave={() => void saveEdit()}
                 onCancel={cancelEdit}
               />

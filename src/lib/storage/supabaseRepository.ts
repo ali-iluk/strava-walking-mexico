@@ -1,4 +1,5 @@
 import { createEmptySnapshot } from '@/lib/progress/aggregate';
+import { defaultWalkAtForDate } from '@/lib/progress/walkAt';
 import { supabase } from '@/lib/supabase/client';
 import type { ProgressRepository } from '@/lib/storage/repository';
 import type { AppSnapshot, DayEntry, UpsertEntryInput } from '@/lib/storage/types';
@@ -9,6 +10,7 @@ type DayEntryRow = {
   date: string;
   steps: number;
   note: string | null;
+  walk_at: string;
   updated_at: string;
 };
 
@@ -18,6 +20,7 @@ function rowToEntry(row: DayEntryRow): DayEntry {
     date: row.date,
     steps: row.steps,
     note: row.note ?? undefined,
+    walkAt: row.walk_at,
     updatedAt: row.updated_at,
   };
 }
@@ -40,9 +43,9 @@ export class SupabaseRepository implements ProgressRepository {
   async load(): Promise<AppSnapshot> {
     const { data, error } = await supabase
       .from('day_entries')
-      .select('id, date, steps, note, updated_at')
+      .select('id, date, steps, note, walk_at, updated_at')
       .order('date', { ascending: false })
-      .order('updated_at', { ascending: false });
+      .order('walk_at', { ascending: true });
 
     if (error) {
       throw new Error(`Failed to load entries: ${error.message}`);
@@ -58,6 +61,7 @@ export class SupabaseRepository implements ProgressRepository {
       date: entry.date,
       steps: entry.steps,
       note: entry.note ?? null,
+      walk_at: entry.walkAt,
       updated_at: entry.updatedAt,
     }));
 
@@ -71,10 +75,12 @@ export class SupabaseRepository implements ProgressRepository {
   }
 
   async upsertEntry(input: UpsertEntryInput): Promise<DayEntry> {
+    const walkAt = input.walkAt ?? defaultWalkAtForDate(input.date);
     const row = {
       date: input.date,
       steps: input.steps,
       note: input.note?.trim() || null,
+      walk_at: walkAt,
     };
 
     if (input.id) {
@@ -82,7 +88,7 @@ export class SupabaseRepository implements ProgressRepository {
         .from('day_entries')
         .update(row)
         .eq('id', input.id)
-        .select('id, date, steps, note, updated_at')
+        .select('id, date, steps, note, walk_at, updated_at')
         .single();
 
       if (error || !data) {
@@ -94,7 +100,7 @@ export class SupabaseRepository implements ProgressRepository {
     const { data, error } = await supabase
       .from('day_entries')
       .insert(row)
-      .select('id, date, steps, note, updated_at')
+      .select('id, date, steps, note, walk_at, updated_at')
       .single();
 
     if (error || !data) {

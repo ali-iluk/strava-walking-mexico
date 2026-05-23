@@ -8,6 +8,8 @@ export type DayEntry = {
   date: string;
   steps: number;
   note?: string;
+  /** When the walk happened (used for order and labels within a day). */
+  walkAt: string;
   updatedAt: string;
 };
 
@@ -24,4 +26,5 @@ export type UpsertEntryInput = {
   date: string;
   steps: number;
   note?: string;
+  walkAt?: string;
 };

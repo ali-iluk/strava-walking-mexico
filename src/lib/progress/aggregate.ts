@@ -1,6 +1,7 @@
 import { compareDesc, format, parseISO } from 'date-fns';
 import type { AppSnapshot, DayEntry } from '@/lib/storage/types';
 import { GOAL_STEPS } from '@/lib/storage/types';
+import { compareWalkAt } from '@/lib/progress/walkAt';
 
 export type ProgressStats = {
   totalSteps: number;
@@ -41,7 +42,7 @@ export function sortEntriesDesc(entries: DayEntry[]): DayEntry[] {
   return [...entries].sort((a, b) => {
     const byDate = compareDesc(parseISO(a.date), parseISO(b.date));
     if (byDate !== 0) return byDate;
-    return compareDesc(parseISO(a.updatedAt), parseISO(b.updatedAt));
+    return compareDesc(parseISO(a.walkAt), parseISO(b.walkAt));
   });
 }
 
@@ -49,7 +50,7 @@ export function sortEntriesAsc(entries: DayEntry[]): DayEntry[] {
   return [...entries].sort((a, b) => {
     const byDate = parseISO(a.date).getTime() - parseISO(b.date).getTime();
     if (byDate !== 0) return byDate;
-    return parseISO(a.updatedAt).getTime() - parseISO(b.updatedAt).getTime();
+    return compareWalkAt(a, b);
   });
 }
 
@@ -90,6 +91,10 @@ export function groupEntriesByDateDesc(entries: DayEntry[]): DateWalkGroup[] {
     }
   }
 
+  for (const group of groups) {
+    group.entries.sort(compareWalkAt);
+  }
+
   return groups;
 }
 
@@ -125,7 +130,7 @@ export function runningTotalAtDate(entries: DayEntry[], targetDate: string): num
     .reduce((sum, e) => sum + e.steps, 0);
 }
 
-/** Cumulative steps after this specific walk (chronological by date, then updatedAt). */
+/** Cumulative steps after this specific walk (chronological by date, then walkAt). */
 export function runningTotalAfterEntry(entries: DayEntry[], entryId: string): number {
   let sum = 0;
   for (const entry of sortEntriesAsc(entries)) {

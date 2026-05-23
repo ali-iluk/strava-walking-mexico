@@ -4,9 +4,11 @@ import { MAX_DAILY_STEPS } from '@/lib/storage/types';
 type TimelineDayCardEditProps = {
   steps: string;
   note: string;
+  walkTime: string;
   busy: boolean;
   onStepsChange: (value: string) => void;
   onNoteChange: (value: string) => void;
+  onWalkTimeChange: (value: string) => void;
   onSave: () => void;
   onCancel: () => void;
 };
@@ -14,9 +16,11 @@ type TimelineDayCardEditProps = {
 export function TimelineDayCardEdit({
   steps,
   note,
+  walkTime,
   busy,
   onStepsChange,
   onNoteChange,
+  onWalkTimeChange,
   onSave,
   onCancel,
 }: TimelineDayCardEditProps) {
@@ -26,6 +30,15 @@ export function TimelineDayCardEdit({
 
   return (
     <div className="mt-2 flex flex-col gap-2">
+      <label className="flex items-center gap-2 text-xs text-muted">
+        <span className="font-semibold">Time</span>
+        <input
+          type="time"
+          value={walkTime}
+          onChange={(e) => onWalkTimeChange(e.target.value)}
+          className="rounded-lg border border-blush px-2 py-1 text-sm text-ink"
+        />
+      </label>
       <input
         type="number"
         value={steps}

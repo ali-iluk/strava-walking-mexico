@@ -6,6 +6,7 @@ export const dayEntrySchema = z.object({
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   steps: z.number().int().min(0).max(MAX_DAILY_STEPS),
   note: z.string().max(500).optional(),
+  walkAt: z.string().datetime(),
   updatedAt: z.string().datetime(),
 });
 

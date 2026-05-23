@@ -1,4 +1,5 @@
 import { createEmptySnapshot } from '@/lib/progress/aggregate';
+import { defaultWalkAtForDate } from '@/lib/progress/walkAt';
 import type { ProgressRepository } from '@/lib/storage/repository';
 import type { AppSnapshot, DayEntry, UpsertEntryInput } from '@/lib/storage/types';
 import { STORAGE_KEY } from '@/lib/storage/types';
@@ -44,6 +45,7 @@ export class LocalStorageRepository implements ProgressRepository {
       date: input.date,
       steps: input.steps,
       note: input.note?.trim() || undefined,
+      walkAt: input.walkAt ?? defaultWalkAtForDate(input.date),
       updatedAt: now,
     };
 

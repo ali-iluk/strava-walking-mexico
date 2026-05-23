@@ -1,5 +1,10 @@
 import { format } from 'date-fns';
-import { useState, type FormEvent } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
+import {
+  combineDateAndTime,
+  defaultWalkAtForDate,
+  walkTimeInputValue,
+} from '@/lib/progress/walkAt';
 import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
 import { DatePicker } from '@/components/DatePicker';
@@ -14,7 +19,12 @@ export function QuickLogForm() {
   const [date, setDate] = useState(today);
   const [steps, setSteps] = useState('');
   const [note, setNote] = useState('');
+  const [walkTime, setWalkTime] = useState(() => walkTimeInputValue(new Date().toISOString()));
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    setWalkTime(walkTimeInputValue(defaultWalkAtForDate(date)));
+  }, [date]);
   const [saving, setSaving] = useState(false);
   const [showInspo, setShowInspo] = useState(false);
 
@@ -33,7 +43,12 @@ export function QuickLogForm() {
 
     setSaving(true);
     try {
-      await upsert({ date, steps: parsed, note: note.trim() || undefined });
+      await upsert({
+        date,
+        steps: parsed,
+        note: note.trim() || undefined,
+        walkAt: combineDateAndTime(date, walkTime),
+      });
       setSteps('');
       setNote('');
     } catch (err) {
@@ -78,6 +93,16 @@ export function QuickLogForm() {
                   onChange={(e) => setSteps(e.target.value)}
                   placeholder="e.g. 12000"
                   className="field-input"
+                  required
+                />
+              </label>
+              <label className="flex flex-col gap-1 text-sm">
+                <span className="font-semibold text-muted">Time of walk</span>
+                <input
+                  type="time"
+                  value={walkTime}
+                  onChange={(e) => setWalkTime(e.target.value)}
+                  className="field-input max-w-[10rem]"
                   required
                 />
               </label>
