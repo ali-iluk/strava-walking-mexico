@@ -5,6 +5,7 @@ import { formatSteps } from '@/hooks/useAnimatedNumber';
 import { useProgress } from '@/hooks/useProgress';
 import { runningTotalAfterEntry, runningTotalAtDate } from '@/lib/progress/aggregate';
 import type { DayEntry } from '@/lib/storage/types';
+import { EditAccessDeniedError } from '@/lib/auth/editGate';
 import { MAX_DAILY_STEPS } from '@/lib/storage/types';
 import { TimelineDayCardEdit } from '@/features/timeline/TimelineDayCardEdit';
 
@@ -53,6 +54,9 @@ export function TimelineDayCard({
         note: note.trim() || undefined,
       });
       setEditing(false);
+    } catch (err) {
+      if (err instanceof EditAccessDeniedError) return;
+      throw err;
     } finally {
       setBusy(false);
     }
@@ -69,6 +73,8 @@ export function TimelineDayCard({
     setBusy(true);
     try {
       await remove(entry.id);
+    } catch (err) {
+      if (err instanceof EditAccessDeniedError) return;
     } finally {
       setBusy(false);
     }

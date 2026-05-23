@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
 import { useProgress } from '@/hooks/useProgress';
+import { EditAccessDeniedError } from '@/lib/auth/editGate';
 import { SCHEMA_VERSION } from '@/lib/storage/types';
 
 export function DataPage() {
@@ -15,7 +16,8 @@ export function DataPage() {
       await clearAll();
       setConfirmClear('');
       setMessage({ type: 'ok', text: 'All entries removed from the database.' });
-    } catch {
+    } catch (err) {
+      if (err instanceof EditAccessDeniedError) return;
       setMessage({ type: 'err', text: 'Could not clear data. Try again.' });
     }
   };

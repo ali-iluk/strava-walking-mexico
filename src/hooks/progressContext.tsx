@@ -16,6 +16,7 @@ import {
   sortEntriesDesc,
 } from '@/lib/progress/aggregate';
 import { lastSevenDailyBars, projectFinishDate } from '@/lib/progress/projections';
+import { useEditAuth } from '@/hooks/editAuthContext';
 import { initProgressStorage, progressRepository } from '@/lib/storage';
 import type { AppSnapshot, DayEntry, UpsertEntryInput } from '@/lib/storage/types';
 
@@ -43,6 +44,7 @@ export type ProgressContextValue = {
 export const ProgressContext = createContext<ProgressContextValue | null>(null);
 
 export function ProgressProvider({ children }: { children: ReactNode }) {
+  const { ensureEditAccess } = useEditAuth();
   const [snapshot, setSnapshot] = useState<AppSnapshot>(createEmptySnapshot());
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -85,18 +87,20 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
 
   const upsert = useCallback(
     async (input: UpsertEntryInput) => {
+      await ensureEditAccess();
       await progressRepository.upsertEntry(input);
       await refresh();
     },
-    [refresh],
+    [ensureEditAccess, refresh],
   );
 
   const remove = useCallback(
     async (id: string) => {
+      await ensureEditAccess();
       await progressRepository.deleteEntry(id);
       await refresh();
     },
-    [refresh],
+    [ensureEditAccess, refresh],
   );
 
   const exportData = useCallback(() => {
@@ -104,9 +108,10 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
   }, [snapshot]);
 
   const clearAll = useCallback(async () => {
+    await ensureEditAccess();
     await progressRepository.clear();
     await refresh();
-  }, [refresh]);
+  }, [ensureEditAccess, refresh]);
 
   const value: ProgressContextValue = {
     snapshot,

@@ -5,6 +5,7 @@ import { Card } from '@/components/Card';
 import { DatePicker } from '@/components/DatePicker';
 import { InspirationModal } from '@/components/InspirationModal';
 import { useProgress } from '@/hooks/useProgress';
+import { EditAccessDeniedError } from '@/lib/auth/editGate';
 import { MAX_DAILY_STEPS } from '@/lib/storage/types';
 
 export function QuickLogForm() {
@@ -35,7 +36,8 @@ export function QuickLogForm() {
       await upsert({ date, steps: parsed, note: note.trim() || undefined });
       setSteps('');
       setNote('');
-    } catch {
+    } catch (err) {
+      if (err instanceof EditAccessDeniedError) return;
       setError('Could not save. Try again.');
     } finally {
       setSaving(false);
