@@ -50,7 +50,7 @@ export function EditAuthProvider({ children }: { children: ReactNode }) {
   }, [promptPassword]);
 
   const submit = () => {
-    if (verifyCredential(password)) {
+    if (verifyCredential(password.trim())) {
       resolverRef.current?.(true);
       resolverRef.current = null;
       setOpen(false);

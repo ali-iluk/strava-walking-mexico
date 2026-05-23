@@ -38,7 +38,8 @@ export function QuickLogForm() {
       setNote('');
     } catch (err) {
       if (err instanceof EditAccessDeniedError) return;
-      setError('Could not save. Try again.');
+      const message = err instanceof Error ? err.message : 'Could not save. Try again.';
+      setError(message.includes('Failed') ? message : 'Could not save. Try again.');
     } finally {
       setSaving(false);
     }

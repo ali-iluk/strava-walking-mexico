@@ -4,7 +4,7 @@ const SESSION_HOURS = 8;
 
 /** XOR-masked code units (not stored as plain text). */
 const MASK = 0x2f;
-const UNITS = [77, 99, 98, 78, 88, 103, 118, 121, 78];
+const UNITS = [77, 67, 90, 74, 88, 71, 70, 91, 74];
 
 function matchesCredential(value: string): boolean {
   if (value.length !== UNITS.length) return false;
