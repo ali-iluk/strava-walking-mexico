@@ -1,6 +1,6 @@
 /** Session key + obfuscated credential check (client-side guard only). */
 const SESSION_KEY = 'wm:sess:v1';
-const SESSION_HOURS = 8;
+const SESSION_DAYS = 30;
 
 /** XOR-masked code units (not stored as plain text). */
 const MASK = 0x2f;
@@ -21,7 +21,7 @@ function sessionDigest(): string {
 
 export function hasEditSession(): boolean {
   try {
-    const raw = sessionStorage.getItem(SESSION_KEY);
+    const raw = localStorage.getItem(SESSION_KEY);
     if (!raw) return false;
     const parsed = JSON.parse(raw) as { exp: number };
     return typeof parsed.exp === 'number' && parsed.exp > Date.now();
@@ -31,12 +31,12 @@ export function hasEditSession(): boolean {
 }
 
 export function grantEditSession(): void {
-  const exp = Date.now() + SESSION_HOURS * 60 * 60 * 1000;
-  sessionStorage.setItem(SESSION_KEY, JSON.stringify({ t: sessionDigest(), exp }));
+  const exp = Date.now() + SESSION_DAYS * 24 * 60 * 60 * 1000;
+  localStorage.setItem(SESSION_KEY, JSON.stringify({ t: sessionDigest(), exp }));
 }
 
 export function clearEditSession(): void {
-  sessionStorage.removeItem(SESSION_KEY);
+  localStorage.removeItem(SESSION_KEY);
 }
 
 export function verifyCredential(value: string): boolean {

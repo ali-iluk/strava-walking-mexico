@@ -1,4 +1,6 @@
 import { NavLink, Outlet } from 'react-router-dom';
+import { HiddenEditTrigger } from '@/components/HiddenEditTrigger';
+import { useEditAuth } from '@/hooks/editAuthContext';
 
 const navLinkClass = ({ isActive }: { isActive: boolean }) =>
   `rounded-lg px-3 py-1.5 text-sm font-semibold transition ${
@@ -6,6 +8,8 @@ const navLinkClass = ({ isActive }: { isActive: boolean }) =>
   }`;
 
 export function Layout() {
+  const { isUnlocked } = useEditAuth();
+
   return (
     <div className="mx-auto flex min-h-screen max-w-3xl flex-col px-4 pb-10 pt-6">
       <header className="mb-8 flex items-center justify-between gap-4">
@@ -19,14 +23,17 @@ export function Layout() {
           <NavLink to="/" end className={navLinkClass}>
             Tracker
           </NavLink>
-          <NavLink to="/data" className={navLinkClass}>
-            Data
-          </NavLink>
+          {isUnlocked && (
+            <NavLink to="/data" className={navLinkClass}>
+              Data
+            </NavLink>
+          )}
         </nav>
       </header>
       <main className="flex-1">
         <Outlet />
       </main>
+      <HiddenEditTrigger />
     </div>
   );
 }

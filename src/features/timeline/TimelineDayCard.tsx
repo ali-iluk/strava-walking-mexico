@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Button } from '@/components/Button';
 import { formatSteps } from '@/hooks/useAnimatedNumber';
+import { useEditAuth } from '@/hooks/editAuthContext';
 import { useProgress } from '@/hooks/useProgress';
 import { runningTotalAfterEntry, runningTotalAtDate } from '@/lib/progress/aggregate';
 import {
@@ -34,6 +35,7 @@ export function TimelineDayCard({
   onOpenDayMap,
   onOpenWalkMap,
 }: TimelineDayCardProps) {
+  const { isUnlocked } = useEditAuth();
   const { snapshot, upsert, remove } = useProgress();
   const [editing, setEditing] = useState(false);
   const [steps, setSteps] = useState(String(entry.steps));
@@ -140,17 +142,25 @@ export function TimelineDayCard({
               >
                 Map
               </Button>
-              <Button variant="ghost" className="!px-2 !py-1 text-xs" onClick={() => setEditing(true)}>
-                Edit
-              </Button>
-              <Button
-                variant="ghost"
-                className="!px-2 !py-1 text-xs text-terracotta"
-                onClick={() => void handleDelete()}
-                disabled={busy}
-              >
-                Delete
-              </Button>
+              {isUnlocked && (
+                <>
+                  <Button
+                    variant="ghost"
+                    className="!px-2 !py-1 text-xs"
+                    onClick={() => setEditing(true)}
+                  >
+                    Edit
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    className="!px-2 !py-1 text-xs text-terracotta"
+                    onClick={() => void handleDelete()}
+                    disabled={busy}
+                  >
+                    Delete
+                  </Button>
+                </>
+              )}
             </div>
           )}
         </div>

@@ -2,7 +2,7 @@ import {
   createContext,
   useCallback,
   useContext,
-  useRef,
+  useEffect,
   useState,
   type ReactNode,
 } from 'react';
@@ -10,14 +10,17 @@ import { Button } from '@/components/Button';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
   EditAccessDeniedError,
+  clearEditSession,
   grantEditSession,
   hasEditSession,
   verifyCredential,
 } from '@/lib/auth/editGate';
 
 type EditAuthContextValue = {
-  ensureEditAccess: () => Promise<void>;
   isUnlocked: boolean;
+  openLogin: () => void;
+  lock: () => void;
+  ensureEditAccess: () => Promise<void>;
 };
 
 const EditAuthContext = createContext<EditAuthContextValue | null>(null);
@@ -26,16 +29,24 @@ export function EditAuthProvider({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
-  const [unlocked, setUnlocked] = useState(hasEditSession());
-  const resolverRef = useRef<((ok: boolean) => void) | null>(null);
+  const [unlocked, setUnlocked] = useState(false);
 
-  const promptPassword = useCallback((): Promise<boolean> => {
-    return new Promise((resolve) => {
-      setPassword('');
-      setError(null);
-      resolverRef.current = resolve;
-      setOpen(true);
-    });
+  useEffect(() => {
+    setUnlocked(hasEditSession());
+  }, []);
+
+  const lock = useCallback(() => {
+    clearEditSession();
+    setUnlocked(false);
+    setOpen(false);
+    setPassword('');
+    setError(null);
+  }, []);
+
+  const openLogin = useCallback(() => {
+    setPassword('');
+    setError(null);
+    setOpen(true);
   }, []);
 
   const ensureEditAccess = useCallback(async () => {
@@ -43,16 +54,13 @@ export function EditAuthProvider({ children }: { children: ReactNode }) {
       setUnlocked(true);
       return;
     }
-    const ok = await promptPassword();
-    if (!ok) throw new EditAccessDeniedError();
-    grantEditSession();
-    setUnlocked(true);
-  }, [promptPassword]);
+    throw new EditAccessDeniedError();
+  }, []);
 
   const submit = () => {
     if (verifyCredential(password.trim())) {
-      resolverRef.current?.(true);
-      resolverRef.current = null;
+      grantEditSession();
+      setUnlocked(true);
       setOpen(false);
       setPassword('');
       setError(null);
@@ -62,15 +70,13 @@ export function EditAuthProvider({ children }: { children: ReactNode }) {
   };
 
   const cancel = () => {
-    resolverRef.current?.(false);
-    resolverRef.current = null;
     setOpen(false);
     setPassword('');
     setError(null);
   };
 
   return (
-    <EditAuthContext.Provider value={{ ensureEditAccess, isUnlocked: unlocked }}>
+    <EditAuthContext.Provider value={{ isUnlocked: unlocked, openLogin, lock, ensureEditAccess }}>
       {children}
       <AnimatePresence>
         {open && (
@@ -96,11 +102,8 @@ export function EditAuthProvider({ children }: { children: ReactNode }) {
               exit={{ scale: 0.96, y: 8 }}
             >
               <h2 id="edit-auth-title" className="font-display text-lg font-bold text-ink">
-                Edit password
+                Unlock edits
               </h2>
-              <p className="mt-1 text-sm text-muted">
-                Adding, editing, or deleting walks requires a password.
-              </p>
               <label className="mt-4 flex flex-col gap-1 text-sm">
                 <span className="font-semibold text-muted">Password</span>
                 <input
@@ -115,6 +118,11 @@ export function EditAuthProvider({ children }: { children: ReactNode }) {
               </label>
               {error && <p className="mt-2 text-sm text-terracotta">{error}</p>}
               <div className="mt-4 flex justify-end gap-2">
+                {unlocked && (
+                  <Button variant="ghost" onClick={lock}>
+                    Lock
+                  </Button>
+                )}
                 <Button variant="ghost" onClick={cancel}>
                   Cancel
                 </Button>

@@ -2,6 +2,7 @@ import { format } from 'date-fns';
 import { useRef } from 'react';
 import type { RouteMapView } from '@/components/RouteMapModal';
 import { Card } from '@/components/Card';
+import { useEditAuth } from '@/hooks/editAuthContext';
 import { useProgress } from '@/hooks/useProgress';
 import { formatSteps } from '@/hooks/useAnimatedNumber';
 import { runningTotalAtDate } from '@/lib/progress/aggregate';
@@ -12,6 +13,7 @@ type TimelineSectionProps = {
 };
 
 export function TimelineSection({ onOpenMap }: TimelineSectionProps) {
+  const { isUnlocked } = useEditAuth();
   const { monthGroups, entriesSorted, snapshot, walkCount } = useProgress();
   const todayRef = useRef<HTMLDivElement>(null);
   const today = format(new Date(), 'yyyy-MM-dd');
@@ -37,7 +39,9 @@ export function TimelineSection({ onOpenMap }: TimelineSectionProps) {
         </p>
         <h2 className="mt-3 font-display text-lg font-semibold text-ink">No walks logged yet</h2>
         <p className="mt-2 text-sm text-muted">
-          Log your first walk above — add morning and evening separately on the same day.
+          {isUnlocked
+            ? 'Log your first walk above — add morning and evening separately on the same day.'
+            : 'Walk history will appear here as walks are logged.'}
         </p>
       </Card>
     );
